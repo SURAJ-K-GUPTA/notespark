@@ -19,7 +19,6 @@ function TestNotes() {
       fetchNotes(); // Refresh notes after saving
     } catch (error) {
       toast.error("Failed to save note");
-      console.error("Error saving note:", error);
     }
   };
 
@@ -29,10 +28,8 @@ function TestNotes() {
       const querySnapshot = await getDocs(collection(db, 'notes'));
       const notesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setNotes(notesData);
-      console.log("Fetched notes:", notesData); // Log to verify data
     } catch (error) {
       toast.error("Failed to load notes");
-      console.error("Error fetching notes:", error);
     }
   };
 

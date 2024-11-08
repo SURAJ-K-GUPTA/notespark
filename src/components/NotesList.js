@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, where, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
+import { ClipLoader } from 'react-spinners';
 
 function NotesList({ userId }) {
   const [notes, setNotes] = useState([]);
@@ -9,29 +10,25 @@ function NotesList({ userId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!userId) {
-      console.error("No user ID available for querying notes.");
-      return;
-    }
-
-    console.log("Attempting to fetch notes for userId:", userId);
+    if (!userId) return;
 
     const q = query(
-        collection(db, 'notes'),
-        orderBy('createdAt', 'desc')
-      );
-      
+      collection(db, 'notes'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log("Snapshot size:", snapshot.size); // Check how many documents were retrieved
-      const notesData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      console.log("Notes data:", notesData); // Log the actual data retrieved
-      setNotes(notesData);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching notes:", error);
-      setLoading(false);
-    });
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const notesData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setNotes(notesData);
+        setLoading(false);
+      },
+      () => {
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [userId]);
@@ -42,13 +39,13 @@ function NotesList({ userId }) {
       toast.success("Note deleted successfully!");
     } catch (error) {
       toast.error("Failed to delete note");
-      console.error("Error deleting note:", error);
     }
   };
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(search.toLowerCase()) ||
-    note.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
+  const filteredNotes = notes.filter(
+    (note) =>
+      note.title.toLowerCase().includes(search.toLowerCase()) ||
+      note.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -62,30 +59,32 @@ function NotesList({ userId }) {
       />
 
       {loading ? (
-        <div className="text-center text-lg font-semibold">Loading notes...</div>
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <ClipLoader color="#2563EB" size={50} />
+        </div>
       ) : (
         <ul className="space-y-4">
-        {filteredNotes.length > 0 ? (
-  filteredNotes
-    .filter(note => note.userId === userId) // Filter notes by userId
-    .map(note => (
-      <li key={note.id} className="bg-white p-4 rounded shadow-md relative">
-        <button
-          onClick={() => handleDelete(note.id)}
-          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-          aria-label="Delete Note"
-        >
-          ✕
-        </button>
-        <h3 className="text-lg font-semibold">{note.title}</h3>
-        <p>{note.content}</p>
-        <p className="text-sm text-gray-500">Tags: {note.tags.join(', ')}</p>
-      </li>
-    ))
-) : (
-  <div className="text-center text-gray-600">No notes found.</div>
-)}
-
+          {filteredNotes.length > 0 ? (
+            filteredNotes.map((note) => (
+              <li
+                key={note.id}
+                className="bg-white p-4 rounded shadow-md relative transition transform hover:scale-105 sm:w-full md:w-3/4 lg:w-1/2 mx-auto"
+              >
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                  aria-label="Delete Note"
+                >
+                  ✕
+                </button>
+                <h3 className="text-lg font-semibold">{note.title}</h3>
+                <p>{note.content}</p>
+                <p className="text-sm text-gray-500">Tags: {note.tags.join(', ')}</p>
+              </li>
+            ))
+          ) : (
+            <div className="text-center text-gray-600">No notes found.</div>
+          )}
         </ul>
       )}
     </div>
