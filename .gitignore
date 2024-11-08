@@ -1,23 +1,38 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Node modules
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Build output
+build/
 
-# testing
-/coverage
+# Environment variables
+.env
 
-# production
-/build
+# Firebase credentials and local configuration
+firebase-debug.log
+.firebaserc
 
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Git-specific files
+.git/
+
+# Tailwind cache
+.tailwind/
+
+# Package lock files
+package-lock.json
+yarn.lock
+
+# Generated files for GitHub Actions (if using GitHub workflow)
+.github/workflows/firebase-hosting.yml
